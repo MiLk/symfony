@@ -3,7 +3,7 @@
 /*
  * This file is part of the symfony package.
  * (c) 2004-2006 Fabien Potencier <fabien.potencier@symfony-project.com>
- *
+ * 
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
@@ -19,7 +19,7 @@
  * @package    symfony
  * @subpackage util
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfDomCssSelector.class.php 31893 2011-01-24 18:11:45Z fabien $
+ * @version    SVN: $Id: sfDomCssSelector.class.php 23892 2009-11-14 11:37:55Z fabien $
  */
 class sfDomCssSelector implements Countable, Iterator
 {
@@ -77,7 +77,20 @@ class sfDomCssSelector implements Countable, Iterator
     return $nodes ? new sfDomCssSelector($nodes) : new sfDomCssSelector(array());
   }
 
-  protected function getElements($selector)
+  /* DEPRECATED */
+  public function getTexts($selector)
+  {
+    $texts = array();
+    foreach ($this->getElements($selector) as $element)
+    {
+      $texts[] = $element->nodeValue;
+    }
+
+    return $texts;
+  }
+
+  /* DEPRECATED */
+  public function getElements($selector)
   {
     $nodes = array();
     foreach ($this->nodes as $node)
@@ -147,7 +160,7 @@ class sfDomCssSelector implements Countable, Iterator
           $nodes = array();
           foreach ($founds as $found)
           {
-            if (preg_match('/(^|\s+)'.$className.'($|\s+)/', $found->getAttribute('class')))
+            if (preg_match('/\b'.$className.'\b/', $found->getAttribute('class')))
             {
               $nodes[] = $found;
             }
@@ -185,7 +198,7 @@ class sfDomCssSelector implements Countable, Iterator
             {
               $attrName = $match[1];
               $attrOperator = $match[2];
-              $attrValue = $match[4] === '' ? (isset($match[5]) ? $match[5] : '') : $match[4];
+              $attrValue = $match[4];
 
               switch ($attrOperator)
               {

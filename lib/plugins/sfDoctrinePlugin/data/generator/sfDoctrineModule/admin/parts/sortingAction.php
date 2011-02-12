@@ -5,11 +5,6 @@
       return;
     }
 
-    if (!in_array(strtolower($sort[1]), array('asc', 'desc')))
-    {
-      $sort[1] = 'asc';
-    }
-
     $query->addOrderBy($sort[0] . ' ' . $sort[1]);
   }
 
@@ -37,5 +32,5 @@
 
   protected function isValidSortColumn($column)
   {
-    return Doctrine_Core::getTable('<?php echo $this->getModelClass() ?>')->hasColumn($column);
+    return Doctrine::getTable('<?php echo $this->getModelClass() ?>')->hasColumn($column);
   }

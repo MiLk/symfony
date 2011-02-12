@@ -16,7 +16,7 @@ require_once(dirname(__FILE__).'/sfPropelBaseTask.class.php');
  * @package    symfony
  * @subpackage propel
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfPropelInsertSqlTask.class.php 23922 2009-11-14 14:58:38Z fabien $
+ * @version    SVN: $Id: sfPropelInsertSqlTask.class.php 22691 2009-10-01 16:53:31Z FabianLange $
  */
 class sfPropelInsertSqlTask extends sfPropelBaseTask
 {
@@ -33,6 +33,7 @@ class sfPropelInsertSqlTask extends sfPropelBaseTask
       new sfCommandOption('phing-arg', null, sfCommandOption::PARAMETER_REQUIRED | sfCommandOption::IS_ARRAY, 'Arbitrary phing argument'),
     ));
 
+    $this->aliases = array('propel-insert-sql');
     $this->namespace = 'propel';
     $this->name = 'insert-sql';
     $this->briefDescription = 'Inserts SQL for current model';

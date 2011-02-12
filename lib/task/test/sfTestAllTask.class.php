@@ -14,7 +14,7 @@
  * @package    symfony
  * @subpackage task
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfTestAllTask.class.php 29415 2010-05-12 06:24:54Z fabien $
+ * @version    SVN: $Id: sfTestAllTask.class.php 23200 2009-10-19 21:29:50Z Kris.Wallsmith $
  */
 class sfTestAllTask extends sfTestBaseTask
 {
@@ -28,6 +28,7 @@ class sfTestAllTask extends sfTestBaseTask
       new sfCommandOption('xml', null, sfCommandOption::PARAMETER_REQUIRED, 'The file name for the JUnit compatible XML log file'),
     ));
 
+    $this->aliases = array('test-all');
     $this->namespace = 'test';
     $this->name = 'all';
     $this->briefDescription = 'Launches all tests';
@@ -42,7 +43,7 @@ The task launches all tests found in [test/|COMMENT].
 If some tests fail, you can use the [--trace|COMMENT] option to have more
 information about the failures:
 
-  [./symfony test:all -t|INFO]
+    [./symfony test:all -t|INFO]
 
 Or you can also try to fix the problem by launching them by hand or with the
 [test:unit|COMMENT] and [test:functional|COMMENT] task.
@@ -50,7 +51,7 @@ Or you can also try to fix the problem by launching them by hand or with the
 Use the [--only-failed|COMMENT] option to force the task to only execute tests
 that failed during the previous run:
 
-  [./symfony test:all --only-failed|INFO]
+    [./symfony test:all --only-failed|INFO]
 
 Here is how it works: the first time, all tests are run as usual. But for
 subsequent test runs, only tests that failed last time are executed. As you
@@ -72,10 +73,7 @@ EOF;
   {
     require_once dirname(__FILE__).'/sfLimeHarness.class.php';
 
-    $h = new sfLimeHarness(array(
-      'force_colors' => isset($options['color']) && $options['color'],
-      'verbose'      => isset($options['trace']) && $options['trace'],
-    ));
+    $h = new sfLimeHarness(array('force_colors' => $options['color'], 'verbose' => $options['trace']));
     $h->addPlugins(array_map(array($this->configuration, 'getPluginConfiguration'), $this->configuration->getPlugins()));
     $h->base_dir = sfConfig::get('sf_test_dir');
 
