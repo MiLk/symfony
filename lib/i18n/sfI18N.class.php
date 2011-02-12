@@ -14,7 +14,7 @@
  * @package    symfony
  * @subpackage i18n
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfI18N.class.php 29520 2010-05-19 11:47:08Z fabien $
+ * @version    SVN: $Id: sfI18N.class.php 24039 2009-11-16 17:52:14Z Kris.Wallsmith $
  */
 class sfI18N
 {
@@ -61,7 +61,7 @@ class sfI18N
 
     if (isset($options['culture']))
     {
-      $this->setCulture($options['culture']);
+      $this->culture = $options['culture'];
       unset($options['culture']);
     }
 
@@ -328,7 +328,7 @@ class sfI18N
    *
    * @return array   An array with the hour and minute
    */
-  public function getTimeForCulture($time, $culture = null)
+  public function getTimeForCulture($time, $culture)
   {
     if (!$time) return 0;
 
@@ -341,29 +341,23 @@ class sfI18N
     $timeRegexp = preg_replace(array('/[hm]+/i', '/a/'), array('(\d+)', '(\w+)'), preg_quote($timeFormat));
 
     // We parse time format to see where things are (h, m)
-    $timePositions = array(
+    $a = array(
       'h' => strpos($timeFormat, 'H') !== false ? strpos($timeFormat, 'H') : strpos($timeFormat, 'h'),
       'm' => strpos($timeFormat, 'm'),
       'a' => strpos($timeFormat, 'a')
     );
-    asort($timePositions);
+    $tmp = array_flip($a);
+    ksort($tmp);
     $i = 0;
-
-    // normalize positions to 0, 1, ...
-    // positions that don't exist in the pattern remain false
-    foreach ($timePositions as $key => $value)
-    {
-      if ($value !== false)
-      {
-        $timePositions[$key] = ++$i;
-      }
-    }
+    $c = array();
+    foreach ($tmp as $value) $c[++$i] = $value;
+    $timePositions = array_flip($c);
 
     // We find all elements
     if (preg_match("~$timeRegexp~", $time, $matches))
     {
       // repect am/pm setting if present
-      if ($timePositions['a'] !== false)
+      if (isset($timePositions['a']))
       {
         if (strcasecmp($matches[$timePositions['a']], $timeFormatInfo->getAMDesignator()) == 0)
         {

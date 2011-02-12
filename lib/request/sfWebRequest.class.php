@@ -18,14 +18,10 @@
  * @subpackage request
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author     Sean Kerr <sean@code-box.org>
- * @version    SVN: $Id: sfWebRequest.class.php 30900 2010-09-13 17:31:37Z Kris.Wallsmith $
+ * @version    SVN: $Id: sfWebRequest.class.php 24265 2009-11-23 11:55:33Z Kris.Wallsmith $
  */
 class sfWebRequest extends sfRequest
 {
-  const
-    PORT_HTTP  = 80,
-    PORT_HTTPS = 443;
-  
   protected
     $languages              = null,
     $charsets               = null,
@@ -48,8 +44,6 @@ class sfWebRequest extends sfRequest
    *  * path_info_key:     The path info key (default to PATH_INFO)
    *  * path_info_array:   The path info array (default to SERVER)
    *  * relative_url_root: The relative URL root
-   *  * http_port:         The port to use for HTTP requests
-   *  * https_port:        The port to use for HTTPS requests
    *
    * @param  sfEventDispatcher $dispatcher  An sfEventDispatcher instance
    * @param  array             $parameters  An associative array of initialization parameters
@@ -67,8 +61,6 @@ class sfWebRequest extends sfRequest
     $options = array_merge(array(
       'path_info_key'   => 'PATH_INFO',
       'path_info_array' => 'SERVER',
-      'http_port'       => null,
-      'https_port'      => null,
       'default_format'  => null, // to maintain bc
     ), $options);
     parent::initialize($dispatcher, $parameters, $attributes, $options);
@@ -214,38 +206,29 @@ class sfWebRequest extends sfRequest
   public function getUriPrefix()
   {
     $pathArray = $this->getPathInfoArray();
-    $secure = $this->isSecure();
-
-    $protocol = $secure ? 'https' : 'http';
-    $host = $this->getHost();
-    $port = null;
-
-    // extract port from host or environment variable
-    if (false !== strpos($host, ':'))
+    if ($this->isSecure())
     {
-      list($host, $port) = explode(':', $host, 2);
+      $standardPort = '443';
+      $protocol = 'https';
     }
-    else if (isset($this->options[$protocol.'_port']))
+    else
     {
-      $port = $this->options[$protocol.'_port'];
-    }
-    else if (isset($pathArray['SERVER_PORT']))
-    {
-      $port = $pathArray['SERVER_PORT'];
+      $standardPort = '80';
+      $protocol = 'http';
     }
 
-    // cleanup the port based on whether the current request is forwarded from
-    // a secure one and whether the introspected port matches the standard one
-    if ($this->isForwardedSecure())
+    $host = explode(':', $this->getHost());
+    if (count($host) == 1)
     {
-      $port = isset($this->options['https_port']) && self::PORT_HTTPS != $this->options['https_port'] ? $this->options['https_port'] : null;
-    }
-    elseif (($secure && self::PORT_HTTPS == $port) || (!$secure && self::PORT_HTTP == $port))
-    {
-      $port = null;
+      $host[] = isset($pathArray['SERVER_PORT']) ? $pathArray['SERVER_PORT'] : '';
     }
 
-    return sprintf('%s://%s%s', $protocol, $host, $port ? ':'.$port : '');
+    if ($host[1] == $standardPort || empty($host[1]))
+    {
+      unset($host[1]);
+    }
+
+    return $protocol.'://'.implode(':', $host);
   }
 
   /**
@@ -265,14 +248,13 @@ class sfWebRequest extends sfRequest
     {
       if (isset($pathArray['REQUEST_URI']))
       {
-        $qs = isset($pathArray['QUERY_STRING']) ? $pathArray['QUERY_STRING'] : '';
         $script_name = $this->getScriptName();
         $uri_prefix = $this->isAbsUri() ? $this->getUriPrefix() : '';
         $pathInfo = preg_replace('/^'.preg_quote($uri_prefix, '/').'/','',$pathArray['REQUEST_URI']);
         $pathInfo = preg_replace('/^'.preg_quote($script_name, '/').'/', '', $pathInfo);
         $prefix_name = preg_replace('#/[^/]+$#', '', $script_name);
         $pathInfo = preg_replace('/^'.preg_quote($prefix_name, '/').'/', '', $pathInfo);
-        $pathInfo = preg_replace('/\??'.preg_quote($qs, '/').'$/', '', $pathInfo);
+        $pathInfo = preg_replace('/\??'.preg_quote($pathArray['QUERY_STRING'], '/').'$/', '', $pathInfo);
       }
     }
     else
@@ -380,21 +362,6 @@ class sfWebRequest extends sfRequest
   public function isMethod($method)
   {
     return strtoupper($method) == $this->getMethod();
-  }
-
-  /**
-   * Returns request method.
-   *
-   * @return string
-   */
-  public function getMethodName()
-  {
-    if ($this->options['logging'])
-    {
-      $this->dispatcher->notify(new sfEvent($this, 'application.log', array('The "sfWebRequest::getMethodName()" method is deprecated, please use "getMethod()" instead.', 'priority' => sfLogger::WARNING)));
-    }
-
-    return $this->getMethod();
   }
 
   /**
@@ -570,7 +537,7 @@ class sfWebRequest extends sfRequest
   }
 
   /**
-   * Returns true if the current or forwarded request is secure (HTTPS protocol).
+   * Returns true if the current request is secure (HTTPS protocol).
    *
    * @return boolean
    */
@@ -578,25 +545,13 @@ class sfWebRequest extends sfRequest
   {
     $pathArray = $this->getPathInfoArray();
 
-    return
-      (isset($pathArray['HTTPS']) && ('on' == strtolower($pathArray['HTTPS']) || 1 == $pathArray['HTTPS']))
+    return (
+      (isset($pathArray['HTTPS']) && (strtolower($pathArray['HTTPS']) == 'on' || $pathArray['HTTPS'] == 1))
       ||
-      (isset($pathArray['HTTP_SSL_HTTPS']) && ('on' == strtolower($pathArray['HTTP_SSL_HTTPS']) || 1 == $pathArray['HTTP_SSL_HTTPS']))
+      (isset($pathArray['HTTP_SSL_HTTPS']) && (strtolower($pathArray['HTTP_SSL_HTTPS']) == 'on' || $pathArray['HTTP_SSL_HTTPS'] == 1))
       ||
-      $this->isForwardedSecure()
-    ;
-  }
-
-  /**
-   * Returns true if the current request is forwarded from a request that is secure.
-   *
-   * @return boolean
-   */
-  protected function isForwardedSecure()
-  {
-    $pathArray = $this->getPathInfoArray();
-
-    return isset($pathArray['HTTP_X_FORWARDED_PROTO']) && 'https' == strtolower($pathArray['HTTP_X_FORWARDED_PROTO']);
+      (isset($pathArray['HTTP_X_FORWARDED_PROTO']) && strtolower($pathArray['HTTP_X_FORWARDED_PROTO']) == 'https')
+    );
   }
 
   /**
@@ -644,18 +599,15 @@ class sfWebRequest extends sfRequest
       // Cut off any q-value that might come after a semi-colon
       if ($pos = strpos($value, ';'))
       {
-        $q     = (float) trim(substr($value, strpos($value, '=') + 1));
-        $value = substr($value, 0, $pos);
+        $q     = (float) trim(substr($value, $pos + 3));
+        $value = trim(substr($value, 0, $pos));
       }
       else
       {
         $q = 1;
       }
 
-      if (0 < $q)
-      {
-        $values[trim($value)] = $q;
-      }
+      $values[$value] = $q;
     }
 
     arsort($values);

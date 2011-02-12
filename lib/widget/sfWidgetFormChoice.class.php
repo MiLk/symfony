@@ -14,7 +14,7 @@
  * @package    symfony
  * @subpackage widget
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfWidgetFormChoice.class.php 30762 2010-08-25 12:33:33Z fabien $
+ * @version    SVN: $Id: sfWidgetFormChoice.class.php 23994 2009-11-15 22:55:24Z bschussek $
  */
 class sfWidgetFormChoice extends sfWidgetFormChoiceBase
 {
@@ -23,6 +23,7 @@ class sfWidgetFormChoice extends sfWidgetFormChoiceBase
    *
    * Available options:
    *
+   *  * choices:          An array of possible choices (required)
    *  * multiple:         true if the select tag must allow multiple selections
    *  * expanded:         true to display an expanded widget
    *                        if expanded is false, then the widget will be a select
@@ -62,8 +63,6 @@ class sfWidgetFormChoice extends sfWidgetFormChoiceBase
   }
 
   /**
-   * Renders the widget.
-   *
    * @param  string $name        The element name
    * @param  string $value       The value selected in this widget
    * @param  array  $attributes  An array of HTML attributes to be merged with the default HTML attributes

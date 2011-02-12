@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/../bootstrap/functional.php');
 
 $t = new lime_test(22);
 
-$authors = Doctrine_Core::getTable('Author')->findAll();
+$authors = Doctrine::getTable('Author')->findAll();
 $t->is(count($authors), 2);
 
 $author = new Author();
@@ -31,7 +31,7 @@ $t->is($author->getName(), $author->name);
 $t->is($author->getId(), 1);
 
 // Make sure we still have only 2 authors
-$authors = Doctrine_Core::getTable('Author')->findAll();
+$authors = Doctrine::getTable('Author')->findAll();
 $t->is(count($authors), 2);
 
 $article = new Article();
