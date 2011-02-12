@@ -14,7 +14,7 @@
  * @package    symfony
  * @subpackage doctrine
  * @author     Jonathan H. Wage <jonwage@gmail.com>
- * @version    SVN: $Id: sfDoctrinePluginConfiguration.class.php 30445 2010-07-28 04:37:32Z Kris.Wallsmith $
+ * @version    SVN: $Id: sfDoctrinePluginConfiguration.class.php 24295 2009-11-23 21:46:39Z Kris.Wallsmith $
  */
 class sfDoctrinePluginConfiguration extends sfPluginConfiguration
 {
@@ -37,31 +37,15 @@ class sfDoctrinePluginConfiguration extends sfPluginConfiguration
       $this->dispatcher->connect('debug.web.load_panels', array('sfWebDebugPanelDoctrine', 'listenToAddPanelEvent'));
     }
 
-    if (!sfConfig::has('sf_doctrine_dir'))
-    {
-      // for BC
-      if (sfConfig::has('sfDoctrinePlugin_doctrine_lib_path'))
-      {
-        sfConfig::set('sf_doctrine_dir', realpath(dirname(sfConfig::get('sfDoctrinePlugin_doctrine_lib_path'))));
-      }
-      else
-      {
-        sfConfig::set('sf_doctrine_dir', realpath(dirname(__FILE__).'/../lib/vendor/doctrine'));
-      }
-    }
-
-    if (!class_exists('Doctrine_Core', false))
-    {
-      require_once sfConfig::get('sf_doctrine_dir').'/Doctrine/Core.php';
-    }
-    spl_autoload_register(array('Doctrine_Core', 'autoload'));
+    require_once sfConfig::get('sf_doctrine_dir', realpath(dirname(__FILE__).'/../lib/vendor/doctrine')).'/Doctrine.php';
+    spl_autoload_register(array('Doctrine', 'autoload'));
 
     $manager = Doctrine_Manager::getInstance();
-    $manager->setAttribute(Doctrine_Core::ATTR_EXPORT, Doctrine_Core::EXPORT_ALL);
-    $manager->setAttribute(Doctrine_Core::ATTR_VALIDATE, Doctrine_Core::VALIDATE_NONE);
-    $manager->setAttribute(Doctrine_Core::ATTR_RECURSIVE_MERGE_FIXTURES, true);
-    $manager->setAttribute(Doctrine_Core::ATTR_AUTO_ACCESSOR_OVERRIDE, true);
-    $manager->setAttribute(Doctrine_Core::ATTR_AUTOLOAD_TABLE_CLASSES, true);
+    $manager->setAttribute(Doctrine::ATTR_EXPORT, Doctrine::EXPORT_ALL);
+    $manager->setAttribute(Doctrine::ATTR_VALIDATE, Doctrine::VALIDATE_NONE);
+    $manager->setAttribute(Doctrine::ATTR_RECURSIVE_MERGE_FIXTURES, true);
+    $manager->setAttribute(Doctrine::ATTR_AUTO_ACCESSOR_OVERRIDE, true);
+    $manager->setAttribute(Doctrine::ATTR_AUTOLOAD_TABLE_CLASSES, true);
 
     // apply default attributes
     $manager->setDefaultAttributes();
@@ -72,14 +56,11 @@ class sfDoctrinePluginConfiguration extends sfPluginConfiguration
     }
 
     $this->dispatcher->notify(new sfEvent($manager, 'doctrine.configure'));
-
-    // make sure the culture is intercepted
-    $this->dispatcher->connect('user.change_culture', array('sfDoctrineRecord', 'listenToChangeCultureEvent'));
   }
 
   /**
    * Returns options for the Doctrine schema builder.
-   *
+   * 
    * @return array
    */
   public function getModelBuilderOptions()
@@ -104,7 +85,7 @@ class sfDoctrinePluginConfiguration extends sfPluginConfiguration
 
   /**
    * Returns a configuration array for the Doctrine CLI.
-   *
+   * 
    * @return array
    */
   public function getCliConfig()

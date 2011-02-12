@@ -123,8 +123,6 @@ class sfCacheSessionStorage extends sfStorage
       }
     }
     session_id($this->id);
-    $this->response->addCacheControlHttpHeader('private');
-
     return true;
   }
 

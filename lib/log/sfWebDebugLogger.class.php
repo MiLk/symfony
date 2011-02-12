@@ -14,7 +14,7 @@
  * @package    symfony
  * @subpackage log
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfWebDebugLogger.class.php 30790 2010-08-31 13:23:50Z Kris.Wallsmith $
+ * @version    SVN: $Id: sfWebDebugLogger.class.php 22853 2009-10-07 12:11:15Z fabien $
  */
 class sfWebDebugLogger extends sfVarLogger
 {
@@ -82,7 +82,7 @@ class sfWebDebugLogger extends sfVarLogger
       return false;
     }
 
-    $message = sprintf(' %%s at %s on line %s (%s)', $errfile, $errline, str_replace('%', '%%', $errstr));
+    $message = sprintf(' %%s at %s on line %s (%s)', $errfile, $errline, $errstr);
     switch ($errno)
     {
       case E_STRICT:

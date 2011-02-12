@@ -20,7 +20,7 @@
  * @subpackage util
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author     Sean Kerr <sean@code-box.org>
- * @version    SVN: $Id: sfNamespacedParameterHolder.class.php 29521 2010-05-19 11:47:56Z fabien $
+ * @version    SVN: $Id: sfNamespacedParameterHolder.class.php 23922 2009-11-14 14:58:38Z fabien $
  */
 class sfNamespacedParameterHolder extends sfParameterHolder
 {
@@ -52,10 +52,8 @@ class sfNamespacedParameterHolder extends sfParameterHolder
   {
     if ($move)
     {
-      if (null !== $values = $this->removeNamespace())
-      {
-          $this->addByRef($values, $namespace);
-      }
+      $values = $this->removeNamespace();
+      $this->addByRef($values, $namespace);
     }
 
     $this->default_namespace = $namespace;
@@ -105,10 +103,6 @@ class sfNamespacedParameterHolder extends sfParameterHolder
     if (isset($this->parameters[$ns][$name]))
     {
       $value = & $this->parameters[$ns][$name];
-    }
-    else if (isset($this->parameters[$ns]))
-    {
-      $value = sfToolkit::getArrayValueForPath($this->parameters[$ns], $name, $default);
     }
     else
     {
@@ -194,16 +188,7 @@ class sfNamespacedParameterHolder extends sfParameterHolder
       $ns = $this->default_namespace;
     }
 
-    if (isset($this->parameters[$ns][$name]))
-    {
-      return true;
-    }
-    else if (isset($this->parameters[$ns]))
-    {
-      return sfToolkit::hasArrayValueForPath($this->parameters[$ns], $name);
-    }
-
-    return false;
+    return isset($this->parameters[$ns][$name]);
   }
 
   /**
@@ -240,10 +225,6 @@ class sfNamespacedParameterHolder extends sfParameterHolder
     {
       $retval = $this->parameters[$ns][$name];
       unset($this->parameters[$ns][$name]);
-    }
-    else
-    {
-      $retval = sfToolkit::removeArrayValueForPath($this->parameters[$ns], $name, $default);
     }
 
     return $retval;
