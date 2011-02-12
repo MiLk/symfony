@@ -19,6 +19,7 @@ mkdir($temp);
 
 // copy fixtures to tmp directory
 copy(dirname(__FILE__).'/fixtures/messages.fr.xml', $temp.'/messages.fr.xml');
+copy(dirname(__FILE__).'/fixtures/invalid.xml', $temp.'/invalid.xml');
 
 $source = sfMessageSource::factory('XLIFF', $temp);
 $source->setCulture('fr_FR');

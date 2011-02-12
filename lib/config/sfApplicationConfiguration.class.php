@@ -14,7 +14,7 @@
  * @package    symfony
  * @subpackage config
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfApplicationConfiguration.class.php 29526 2010-05-19 13:06:40Z fabien $
+ * @version    SVN: $Id: sfApplicationConfiguration.class.php 24037 2009-11-16 17:35:09Z Kris.Wallsmith $
  */
 abstract class sfApplicationConfiguration extends ProjectConfiguration
 {
@@ -234,9 +234,6 @@ abstract class sfApplicationConfiguration extends ProjectConfiguration
       {
         if (is_readable($file))
         {
-          header("HTTP/1.1 503 Service Temporarily Unavailable");
-          header("Status: 503 Service Temporarily Unavailable");
-
           include $file;
           break;
         }
@@ -660,12 +657,31 @@ abstract class sfApplicationConfiguration extends ProjectConfiguration
 
         if (!$included)
         {
-          throw new InvalidArgumentException(sprintf('Unable to load "%sHelper.php" helper in: %s.', $helperName, implode(', ', array_map(array('sfDebug', 'shortenFilePath'), $dirs))));
+          // search in the include path
+          if ((@include_once('helper/'.$fileName)) != 1)
+          {
+            $dirs = array_merge($dirs, explode(PATH_SEPARATOR, get_include_path()));
+            $dirs = array_map(array('sfDebug', 'shortenFilePath'), $dirs);
+
+            throw new InvalidArgumentException(sprintf('Unable to load "%sHelper.php" helper in: %s.', $helperName, implode(', ', $dirs)));
+          }
+          else
+          {
+            $this->dispatcher->notify(new sfEvent($this, 'application.log', array('Loading of helpers via the include path has been deprecated.', 'priority' => sfLogger::NOTICE)));
+          }
         }
       }
 
       self::$loadedHelpers[$helperName] = true;
     }
+  }
+
+  /**
+   * @deprecated
+   */
+  public function loadPluginConfig()
+  {
+    $this->initializePlugins();
   }
 
   /**

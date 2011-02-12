@@ -16,7 +16,7 @@ require_once(dirname(__FILE__).'/sfDoctrineBaseTask.class.php');
  * @package    symfony
  * @subpackage doctrine
  * @author     Jonathan H. Wage <jonwage@gmail.com>
- * @version    SVN: $Id: sfDoctrineCreateModelTablesTask.class.php 23922 2009-11-14 14:58:38Z fabien $
+ * @version    SVN: $Id: sfDoctrineCreateModelTablesTask.class.php 23810 2009-11-12 11:07:44Z Kris.Wallsmith $
  */
 class sfDoctrineCreateModelTables extends sfDoctrineBaseTask
 {
@@ -31,6 +31,7 @@ class sfDoctrineCreateModelTables extends sfDoctrineBaseTask
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
     ));
 
+    $this->aliases = array();
     $this->namespace = 'doctrine';
     $this->name = 'create-model-tables';
     $this->briefDescription = 'Drop and recreate tables for specified models.';

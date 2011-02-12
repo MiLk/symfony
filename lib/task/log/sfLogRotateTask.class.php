@@ -39,6 +39,7 @@ class sfLogRotateTask extends sfBaseTask
       new sfCommandOption('period', null, sfCommandOption::PARAMETER_REQUIRED, 'The period in days', self::DEF_PERIOD),
     ));
 
+    $this->aliases = array('log-rotate');
     $this->namespace = 'log';
     $this->name = 'rotate';
     $this->briefDescription = 'Rotates an application\'s log files';
