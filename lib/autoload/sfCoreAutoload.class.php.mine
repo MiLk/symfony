@@ -11,11 +11,7 @@
 /**
  * The current symfony version.
  */
-<<<<<<< .mine
 define('SYMFONY_VERSION', '1.4.9');
-=======
-define('SYMFONY_VERSION', '1.4.11');
->>>>>>> .r32480
 
 /**
  * sfCoreAutoload class.
